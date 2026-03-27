@@ -1,27 +1,35 @@
+type Usuario = {
+  id: number;
+  nome: string;
+  email: string;
+  senha: string;
+  perfil: string;
+};
+
 import React, { useMemo, useState } from "react";
 
-const usuarios = [
+const usuarios: Usuario[] = [
   {
     id: 1,
     nome: "Jonas",
-    email: "tecnico",
+    email: "jonas@teste.com",
     senha: "123",
-    perfil: "tecnico",
+    perfil: "tecnico"
   },
   {
     id: 2,
     nome: "Central",
-    email: "central",
+    email: "central@teste.com",
     senha: "123",
-    perfil: "central",
-  },
+    perfil: "central"
+  }
 ];
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erroLogin, setErroLogin] = useState("");
-  const [usuarioLogado, setUsuarioLogado] = useState<any>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
 
   const [form, setForm] = useState({
     cliente: "",
