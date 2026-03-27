@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./styles.css";
+import logo from "./logo-grupoon.jpg";
 
 const usuarios = [
   {
     id: 1,
     nome: "Jonas",
-    email: "jonas@teste.com",
+    usuario: "jonas",
     senha: "123",
     perfil: "tecnico",
   },
   {
     id: 2,
-    nome: "Central",
-    email: "central@teste.com",
-    senha: "123",
+    nome: "Central Grupo ON",
+    usuario: "grupoon",
+    senha: "protege1234",
     perfil: "central",
   },
 ];
