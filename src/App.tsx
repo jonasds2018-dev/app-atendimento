@@ -81,7 +81,7 @@ export default function App() {
     setMensagem("");
   }
 
-  function alterarCampo(e) {
+  function alterarCampo(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
