@@ -1,35 +1,28 @@
-type Usuario = {
-  id: number;
-  nome: string;
-  email: string;
-  senha: string;
-  perfil: string;
-};
-
 import React, { useMemo, useState } from "react";
+import "./styles.css";
 
-const usuarios: Usuario[] = [
+const usuarios = [
   {
     id: 1,
     nome: "Jonas",
     email: "jonas@teste.com",
     senha: "123",
-    perfil: "tecnico"
+    perfil: "tecnico",
   },
   {
     id: 2,
     nome: "Central",
     email: "central@teste.com",
     senha: "123",
-    perfil: "central"
-  }
+    perfil: "central",
+  },
 ];
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erroLogin, setErroLogin] = useState("");
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
 
   const [form, setForm] = useState({
     cliente: "",
@@ -52,7 +45,7 @@ export default function App() {
     tecnico: "",
   });
 
-  const [central, setCentral] = useState<any[]>([]);
+  const [central, setCentral] = useState([]);
   const [busca, setBusca] = useState("");
   const [mensagem, setMensagem] = useState("");
 
@@ -81,7 +74,7 @@ export default function App() {
     setMensagem("");
   }
 
-  function alterarCampo(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function alterarCampo(e) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -177,13 +170,13 @@ export default function App() {
 
   if (!usuarioLogado) {
     return (
-      <div style={styles.page}>
-        <div style={styles.loginBox}>
+      <div className="page">
+        <div className="loginBox">
           <h2>Login do Sistema</h2>
           <p>Entre como técnico ou central</p>
 
           <input
-            style={styles.input}
+            className="input"
             type="email"
             placeholder="E-mail"
             value={email}
@@ -191,20 +184,20 @@ export default function App() {
           />
 
           <input
-            style={styles.input}
+            className="input"
             type="password"
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
           />
 
-          <button style={styles.button} onClick={fazerLogin}>
+          <button className="button" onClick={fazerLogin}>
             Entrar
           </button>
 
-          {erroLogin && <p style={styles.error}>{erroLogin}</p>}
+          {erroLogin && <p className="error">{erroLogin}</p>}
 
-          <div style={{ marginTop: 20, fontSize: 14 }}>
+          <div className="credenciais">
             <p>
               <strong>Login técnico:</strong> jonas@teste.com
             </p>
@@ -224,9 +217,9 @@ export default function App() {
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <div style={styles.topo}>
+    <div className="page">
+      <div className="container">
+        <div className="topo">
           <div>
             <h1>App de Atendimento Técnico</h1>
             <p>
@@ -235,20 +228,20 @@ export default function App() {
             </p>
           </div>
 
-          <button style={styles.logoutButton} onClick={sair}>
+          <button className="logoutButton" onClick={sair}>
             Sair
           </button>
         </div>
 
-        <div style={styles.grid}>
+        <div className="grid">
           {usuarioLogado.perfil === "tecnico" && (
-            <div style={styles.card}>
+            <div className="card">
               <h2>Novo atendimento</h2>
 
               <form onSubmit={enviarRelatorio}>
-                <div style={styles.row}>
+                <div className="row">
                   <input
-                    style={styles.input}
+                    className="input"
                     name="cliente"
                     value={form.cliente}
                     onChange={alterarCampo}
@@ -256,7 +249,7 @@ export default function App() {
                     required
                   />
                   <input
-                    style={styles.input}
+                    className="input"
                     name="telefone"
                     value={form.telefone}
                     onChange={alterarCampo}
@@ -265,9 +258,9 @@ export default function App() {
                   />
                 </div>
 
-                <div style={styles.row}>
+                <div className="row">
                   <input
-                    style={styles.input}
+                    className="input"
                     name="endereco"
                     value={form.endereco}
                     onChange={alterarCampo}
@@ -275,7 +268,7 @@ export default function App() {
                     required
                   />
                   <input
-                    style={styles.input}
+                    className="input"
                     name="bairro"
                     value={form.bairro}
                     onChange={alterarCampo}
@@ -283,23 +276,23 @@ export default function App() {
                   />
                 </div>
 
-                <div style={styles.row}>
+                <div className="row">
                   <input
-                    style={styles.input}
+                    className="input"
                     name="cidade"
                     value={form.cidade}
                     onChange={alterarCampo}
                     placeholder="Cidade/UF"
                   />
                   <input
-                    style={styles.input}
+                    className="input"
                     type="date"
                     name="data"
                     value={form.data}
                     onChange={alterarCampo}
                   />
                   <input
-                    style={styles.input}
+                    className="input"
                     type="time"
                     name="hora"
                     value={form.hora}
@@ -307,9 +300,9 @@ export default function App() {
                   />
                 </div>
 
-                <div style={styles.row}>
+                <div className="row">
                   <select
-                    style={styles.input}
+                    className="input"
                     name="tipoServico"
                     value={form.tipoServico}
                     onChange={alterarCampo}
@@ -324,7 +317,7 @@ export default function App() {
                   </select>
 
                   <input
-                    style={styles.input}
+                    className="input"
                     name="equipamento"
                     value={form.equipamento}
                     onChange={alterarCampo}
@@ -332,7 +325,7 @@ export default function App() {
                   />
 
                   <input
-                    style={styles.input}
+                    className="input"
                     name="marcaModelo"
                     value={form.marcaModelo}
                     onChange={alterarCampo}
@@ -341,7 +334,7 @@ export default function App() {
                 </div>
 
                 <textarea
-                  style={styles.textarea}
+                  className="textarea"
                   name="defeitoRelatado"
                   value={form.defeitoRelatado}
                   onChange={alterarCampo}
@@ -350,7 +343,7 @@ export default function App() {
                 />
 
                 <textarea
-                  style={styles.textarea}
+                  className="textarea"
                   name="servicoRealizado"
                   value={form.servicoRealizado}
                   onChange={alterarCampo}
@@ -359,16 +352,16 @@ export default function App() {
                 />
 
                 <textarea
-                  style={styles.textarea}
+                  className="textarea"
                   name="observacoes"
                   value={form.observacoes}
                   onChange={alterarCampo}
                   placeholder="Observações"
                 />
 
-                <div style={styles.row}>
+                <div className="row">
                   <input
-                    style={styles.input}
+                    className="input"
                     name="valor"
                     value={form.valor}
                     onChange={alterarCampo}
@@ -377,7 +370,7 @@ export default function App() {
                   />
 
                   <select
-                    style={styles.input}
+                    className="input"
                     name="pagamento"
                     value={form.pagamento}
                     onChange={alterarCampo}
@@ -391,7 +384,7 @@ export default function App() {
                   </select>
 
                   <select
-                    style={styles.input}
+                    className="input"
                     name="status"
                     value={form.status}
                     onChange={alterarCampo}
@@ -403,9 +396,9 @@ export default function App() {
                   </select>
                 </div>
 
-                <div style={styles.row}>
+                <div className="row">
                   <select
-                    style={styles.input}
+                    className="input"
                     name="retornoNecessario"
                     value={form.retornoNecessario}
                     onChange={alterarCampo}
@@ -415,7 +408,7 @@ export default function App() {
                   </select>
 
                   <input
-                    style={styles.input}
+                    className="input"
                     name="tecnico"
                     value={form.tecnico}
                     onChange={alterarCampo}
@@ -424,20 +417,20 @@ export default function App() {
                   />
                 </div>
 
-                <div style={{ marginBottom: 12, fontWeight: "bold" }}>
+                <div className="valorTexto">
                   Valor: {formatarMoeda(form.valor)}
                 </div>
 
-                <button style={styles.button} type="submit">
+                <button className="button" type="submit">
                   Finalizar e enviar para a central
                 </button>
               </form>
 
-              {mensagem && <p style={styles.success}>{mensagem}</p>}
+              {mensagem && <p className="success">{mensagem}</p>}
             </div>
           )}
 
-          <div style={styles.card}>
+          <div className="card">
             <h2>
               {usuarioLogado.perfil === "central"
                 ? "Central de recebimento"
@@ -445,63 +438,35 @@ export default function App() {
             </h2>
 
             <input
-              style={styles.input}
+              className="input"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar atendimento"
             />
 
-            <div style={{ marginTop: 16 }}>
+            <div className="lista">
               {atendimentosFiltrados.length === 0 ? (
                 <p>Nenhum atendimento recebido.</p>
               ) : (
                 atendimentosFiltrados.map((item) => (
-                  <div key={item.protocolo} style={styles.item}>
+                  <div key={item.protocolo} className="item">
                     <h3>
                       {item.cliente} - {item.protocolo}
                     </h3>
-                    <p>
-                      <strong>Telefone:</strong> {item.telefone}
-                    </p>
-                    <p>
-                      <strong>Endereço:</strong> {item.endereco}
-                    </p>
-                    <p>
-                      <strong>Tipo:</strong> {item.tipoServico}
-                    </p>
-                    <p>
-                      <strong>Equipamento:</strong> {item.equipamento}
-                    </p>
-                    <p>
-                      <strong>Marca/Modelo:</strong> {item.marcaModelo}
-                    </p>
-                    <p>
-                      <strong>Defeito:</strong> {item.defeitoRelatado}
-                    </p>
-                    <p>
-                      <strong>Serviço:</strong> {item.servicoRealizado}
-                    </p>
-                    <p>
-                      <strong>Observações:</strong> {item.observacoes || "-"}
-                    </p>
-                    <p>
-                      <strong>Valor:</strong> {item.valorFormatado}
-                    </p>
-                    <p>
-                      <strong>Pagamento:</strong> {item.pagamento}
-                    </p>
-                    <p>
-                      <strong>Status:</strong> {item.status}
-                    </p>
-                    <p>
-                      <strong>Retorno:</strong> {item.retornoNecessario}
-                    </p>
-                    <p>
-                      <strong>Técnico:</strong> {item.tecnico}
-                    </p>
-                    <p>
-                      <strong>Recebido em:</strong> {item.enviadoEm}
-                    </p>
+                    <p><strong>Telefone:</strong> {item.telefone}</p>
+                    <p><strong>Endereço:</strong> {item.endereco}</p>
+                    <p><strong>Tipo:</strong> {item.tipoServico}</p>
+                    <p><strong>Equipamento:</strong> {item.equipamento}</p>
+                    <p><strong>Marca/Modelo:</strong> {item.marcaModelo}</p>
+                    <p><strong>Defeito:</strong> {item.defeitoRelatado}</p>
+                    <p><strong>Serviço:</strong> {item.servicoRealizado}</p>
+                    <p><strong>Observações:</strong> {item.observacoes || "-"}</p>
+                    <p><strong>Valor:</strong> {item.valorFormatado}</p>
+                    <p><strong>Pagamento:</strong> {item.pagamento}</p>
+                    <p><strong>Status:</strong> {item.status}</p>
+                    <p><strong>Retorno:</strong> {item.retornoNecessario}</p>
+                    <p><strong>Técnico:</strong> {item.tecnico}</p>
+                    <p><strong>Recebido em:</strong> {item.enviadoEm}</p>
                   </div>
                 ))
               )}
@@ -512,99 +477,3 @@ export default function App() {
     </div>
   );
 }
-
-const styles = {
-  page: {
-    fontFamily: "Arial, sans-serif",
-    background: "#f3f4f6",
-    minHeight: "100vh",
-    padding: 20,
-  },
-  container: {
-    maxWidth: 1200,
-    margin: "0 auto",
-  },
-  loginBox: {
-    maxWidth: 420,
-    margin: "60px auto",
-    background: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-  },
-  topo: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 20,
-    flexWrap: "wrap",
-    marginBottom: 20,
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 20,
-  },
-  card: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-  },
-  row: {
-    display: "flex",
-    gap: 10,
-    marginBottom: 10,
-    flexWrap: "wrap",
-  },
-  input: {
-    flex: 1,
-    minWidth: 150,
-    padding: 10,
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    marginBottom: 10,
-  },
-  textarea: {
-    width: "100%",
-    minHeight: 90,
-    padding: 10,
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    marginBottom: 10,
-  },
-  button: {
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    padding: "12px 18px",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  logoutButton: {
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    padding: "10px 16px",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  success: {
-    marginTop: 12,
-    color: "green",
-    fontWeight: "bold",
-  },
-  error: {
-    color: "red",
-    marginTop: 10,
-  },
-  item: {
-    border: "1px solid #ddd",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    background: "#fafafa",
-  },
-};
