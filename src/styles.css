@@ -1,27 +1,58 @@
-.logoTexto {
-  width: 100%;
-  max-width: 260px;
-  margin: 0 auto 14px;
-  padding: 20px 16px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
-  color: #fff;
-  font-size: 30px;
-  font-weight: 800;
-  text-align: center;
-  letter-spacing: 1px;
+.page {
+  min-height: 100vh;
+  padding: 20px;
+  background: #f3f4f6;
 }
 
-.logoTopoTexto {
-  width: 60px;
-  height: 60px;
+.loginBox {
+  max-width: 460px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 20px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #ef4444 0%, #2563eb 100%);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.loginBox h2 {
+  margin-top: 0;
+  margin-bottom: 14px;
   font-size: 22px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+
+.loginBox p {
+  margin-bottom: 16px;
+  color: #222;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.input {
+  flex: 1;
+  min-width: 150px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  background: #fff;
+}
+
+.button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
 }
