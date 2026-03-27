@@ -348,7 +348,7 @@ export default function App() {
     }, 500);
   }
 
- if (!usuarioLogado) {
+if (!usuarioLogado) {
   return (
     <div className="page">
       <div className="loginBox">
