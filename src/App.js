@@ -348,43 +348,40 @@ export default function App() {
     }, 500);
   }
 
-  if (!usuarioLogado) {
-    return (
-      <div className="page loginPage">
-        <div className="loginBox">
-          <div className="logoArea">
-            <div className="logoTexto">GRUPO ON</div>
-            <h2>Grupo ON</h2>
-            <p>Ligados em sua Segurança</p>
-          </div>
+ if (!usuarioLogado) {
+  return (
+    <div className="page">
+      <div className="loginBox">
+        <h2>Login do Sistema</h2>
+        <p>Entre como técnico ou central</p>
 
-          <div className="loginForm">
-            <input
-              className="input"
-              type="text"
-              placeholder="Usuário"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-            />
+        <div className="row">
+          <input
+            className="input"
+            type="text"
+            placeholder="Usuário"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+          />
 
-            <input
-              className="input"
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
-
-            <button className="button" onClick={fazerLogin}>
-              Entrar
-            </button>
-
-            {erroLogin && <p className="error">{erroLogin}</p>}
-          </div>
+          <input
+            className="input"
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+          />
         </div>
+
+        <button className="button" onClick={fazerLogin}>
+          Entrar
+        </button>
+
+        {erroLogin && <p className="error">{erroLogin}</p>}
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="page">
