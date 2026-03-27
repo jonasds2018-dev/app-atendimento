@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./styles.css";
 
 const usuarios = [
@@ -18,36 +18,53 @@ const usuarios = [
   },
 ];
 
+const STORAGE_KEY = "atendimentos_app_local_v2";
+
 export default function App() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erroLogin, setErroLogin] = useState("");
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [abaCentral, setAbaCentral] = useState("atendimentos");
 
   const [form, setForm] = useState({
     cliente: "",
-    telefone: "",
     endereco: "",
+    numeroResidencia: "",
     bairro: "",
-    cidade: "",
     data: new Date().toISOString().slice(0, 10),
-    hora: new Date().toTimeString().slice(0, 5),
-    tipoServico: "Alarme",
-    equipamento: "",
-    marcaModelo: "",
-    defeitoRelatado: "",
+    horaInicio: "",
+    horaTermino: "",
+    defeitoApresentado: "",
     servicoRealizado: "",
-    observacoes: "",
     valor: "",
     pagamento: "Pix",
-    status: "Concluído",
-    retornoNecessario: "Não",
     tecnico: "",
   });
 
-  const [central, setCentral] = useState([]);
+  const [central, setCentral] = useState(() => {
+    const dados = localStorage.getItem(STORAGE_KEY);
+    return dados ? JSON.parse(dados) : [];
+  });
+
   const [busca, setBusca] = useState("");
   const [mensagem, setMensagem] = useState("");
+
+  useEffect(() => {
+    const agora = new Date();
+    const noventaDiasMs = 90 * 24 * 60 * 60 * 1000;
+
+    const filtrados = central.filter((item) => {
+      if (!item.criadoEmTimestamp) return true;
+      return agora.getTime() - item.criadoEmTimestamp <= noventaDiasMs;
+    });
+
+    if (filtrados.length !== central.length) {
+      setCentral(filtrados);
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(central));
+    }
+  }, [central]);
 
   function fazerLogin() {
     const usuario = usuarios.find(
@@ -57,6 +74,7 @@ export default function App() {
     if (usuario) {
       setUsuarioLogado(usuario);
       setErroLogin("");
+      setMensagem("");
       setForm((prev) => ({
         ...prev,
         tecnico: usuario.nome,
@@ -72,6 +90,8 @@ export default function App() {
     setSenha("");
     setErroLogin("");
     setMensagem("");
+    setBusca("");
+    setAbaCentral("atendimentos");
   }
 
   function alterarCampo(e) {
@@ -85,15 +105,19 @@ export default function App() {
     return `AT-${ano}-${numero}`;
   }
 
-  function formatarMoeda(valor) {
+  function valorParaNumero(valor) {
     const numero = Number(
-      String(valor)
+      String(valor || "")
         .replace(/\./g, "")
         .replace(",", ".")
         .replace(/[^\d.-]/g, "")
     );
 
-    if (isNaN(numero)) return "R$ 0,00";
+    return isNaN(numero) ? 0 : numero;
+  }
+
+  function formatarMoeda(valor) {
+    const numero = typeof valor === "number" ? valor : valorParaNumero(valor);
 
     return numero.toLocaleString("pt-BR", {
       style: "currency",
@@ -109,37 +133,35 @@ export default function App() {
         ? usuarioLogado.nome
         : form.tecnico;
 
+    const agora = new Date();
+
     const novo = {
       ...form,
       tecnico: tecnicoNome,
       protocolo: gerarProtocolo(),
       valorFormatado: formatarMoeda(form.valor),
-      enviadoEm: new Date().toLocaleString("pt-BR"),
+      enviadoEm: agora.toLocaleString("pt-BR"),
+      criadoEmTimestamp: agora.getTime(),
+      criadoEmDataISO: agora.toISOString(),
     };
 
     setCentral((prev) => [novo, ...prev]);
-    setMensagem(`Relatório ${novo.protocolo} enviado para a central.`);
+    setMensagem(`Atendimento ${novo.protocolo} salvo com sucesso.`);
 
     setForm((prev) => ({
       ...prev,
       cliente: "",
-      telefone: "",
       endereco: "",
+      numeroResidencia: "",
       bairro: "",
-      cidade: "",
-      tipoServico: "Alarme",
-      equipamento: "",
-      marcaModelo: "",
-      defeitoRelatado: "",
+      data: new Date().toISOString().slice(0, 10),
+      horaInicio: "",
+      horaTermino: "",
+      defeitoApresentado: "",
       servicoRealizado: "",
-      observacoes: "",
       valor: "",
       pagamento: "Pix",
-      status: "Concluído",
-      retornoNecessario: "Não",
       tecnico: tecnicoNome,
-      data: new Date().toISOString().slice(0, 10),
-      hora: new Date().toTimeString().slice(0, 5),
     }));
   }
 
@@ -156,17 +178,46 @@ export default function App() {
       [
         item.protocolo,
         item.cliente,
-        item.telefone,
         item.endereco,
-        item.tipoServico,
+        item.numeroResidencia,
+        item.bairro,
+        item.data,
+        item.horaInicio,
+        item.horaTermino,
+        item.defeitoApresentado,
+        item.servicoRealizado,
+        item.pagamento,
         item.tecnico,
-        item.status,
       ]
         .join(" ")
         .toLowerCase()
         .includes(termo)
     );
   }, [central, busca, usuarioLogado]);
+
+  const resumoFinanceiro = useMemo(() => {
+    return central.reduce(
+      (acc, item) => {
+        const valor = valorParaNumero(item.valor);
+
+        acc.quantidade += 1;
+        acc.total += valor;
+
+        if (item.pagamento === "Pix") acc.pix += valor;
+        else if (item.pagamento === "Cartão") acc.cartao += valor;
+        else if (item.pagamento === "Dinheiro") acc.dinheiro += valor;
+
+        return acc;
+      },
+      {
+        quantidade: 0,
+        total: 0,
+        pix: 0,
+        cartao: 0,
+        dinheiro: 0,
+      }
+    );
+  }, [central]);
 
   if (!usuarioLogado) {
     return (
@@ -198,18 +249,10 @@ export default function App() {
           {erroLogin && <p className="error">{erroLogin}</p>}
 
           <div className="credenciais">
-            <p>
-              <strong>Login técnico:</strong> jonas@teste.com
-            </p>
-            <p>
-              <strong>Senha:</strong> 123
-            </p>
-            <p>
-              <strong>Login central:</strong> central@teste.com
-            </p>
-            <p>
-              <strong>Senha:</strong> 123
-            </p>
+            <p><strong>Login técnico:</strong> jonas@teste.com</p>
+            <p><strong>Senha:</strong> 123</p>
+            <p><strong>Login central:</strong> central@teste.com</p>
+            <p><strong>Senha:</strong> 123</p>
           </div>
         </div>
       </div>
@@ -221,7 +264,7 @@ export default function App() {
       <div className="container">
         <div className="topo">
           <div>
-            <h1>App de Atendimento Técnico</h1>
+            <h1>Sistema de Atendimento</h1>
             <p>
               Usuário logado: <strong>{usuarioLogado.nome}</strong> | Perfil:{" "}
               <strong>{usuarioLogado.perfil}</strong>
@@ -233,10 +276,10 @@ export default function App() {
           </button>
         </div>
 
-        <div className="grid">
-          {usuarioLogado.perfil === "tecnico" && (
+        {usuarioLogado.perfil === "tecnico" && (
+          <div className="grid">
             <div className="card">
-              <h2>Novo atendimento</h2>
+              <h2>Novo Atendimento</h2>
 
               <form onSubmit={enviarRelatorio}>
                 <div className="row">
@@ -246,14 +289,6 @@ export default function App() {
                     value={form.cliente}
                     onChange={alterarCampo}
                     placeholder="Nome do cliente"
-                    required
-                  />
-                  <input
-                    className="input"
-                    name="telefone"
-                    value={form.telefone}
-                    onChange={alterarCampo}
-                    placeholder="Telefone"
                     required
                   />
                 </div>
@@ -269,20 +304,22 @@ export default function App() {
                   />
                   <input
                     className="input"
-                    name="bairro"
-                    value={form.bairro}
+                    name="numeroResidencia"
+                    value={form.numeroResidencia}
                     onChange={alterarCampo}
-                    placeholder="Bairro"
+                    placeholder="Número da residência"
+                    required
                   />
                 </div>
 
                 <div className="row">
                   <input
                     className="input"
-                    name="cidade"
-                    value={form.cidade}
+                    name="bairro"
+                    value={form.bairro}
                     onChange={alterarCampo}
-                    placeholder="Cidade/UF"
+                    placeholder="Bairro"
+                    required
                   />
                   <input
                     className="input"
@@ -290,55 +327,37 @@ export default function App() {
                     name="data"
                     value={form.data}
                     onChange={alterarCampo}
-                  />
-                  <input
-                    className="input"
-                    type="time"
-                    name="hora"
-                    value={form.hora}
-                    onChange={alterarCampo}
+                    required
                   />
                 </div>
 
                 <div className="row">
-                  <select
-                    className="input"
-                    name="tipoServico"
-                    value={form.tipoServico}
-                    onChange={alterarCampo}
-                  >
-                    <option>Alarme</option>
-                    <option>Portão eletrônico</option>
-                    <option>Câmeras</option>
-                    <option>Interfone</option>
-                    <option>Cerca elétrica</option>
-                    <option>Controle de acesso</option>
-                    <option>Outro</option>
-                  </select>
-
                   <input
                     className="input"
-                    name="equipamento"
-                    value={form.equipamento}
+                    type="time"
+                    name="horaInicio"
+                    value={form.horaInicio}
                     onChange={alterarCampo}
-                    placeholder="Equipamento"
+                    placeholder="Hora início"
+                    required
                   />
-
                   <input
                     className="input"
-                    name="marcaModelo"
-                    value={form.marcaModelo}
+                    type="time"
+                    name="horaTermino"
+                    value={form.horaTermino}
                     onChange={alterarCampo}
-                    placeholder="Marca / modelo"
+                    placeholder="Hora término"
+                    required
                   />
                 </div>
 
                 <textarea
                   className="textarea"
-                  name="defeitoRelatado"
-                  value={form.defeitoRelatado}
+                  name="defeitoApresentado"
+                  value={form.defeitoApresentado}
                   onChange={alterarCampo}
-                  placeholder="Defeito relatado"
+                  placeholder="Defeito apresentado"
                   required
                 />
 
@@ -351,21 +370,13 @@ export default function App() {
                   required
                 />
 
-                <textarea
-                  className="textarea"
-                  name="observacoes"
-                  value={form.observacoes}
-                  onChange={alterarCampo}
-                  placeholder="Observações"
-                />
-
                 <div className="row">
                   <input
                     className="input"
                     name="valor"
                     value={form.valor}
                     onChange={alterarCampo}
-                    placeholder="Valor ex: 190,00"
+                    placeholder="Valor"
                     required
                   />
 
@@ -376,45 +387,9 @@ export default function App() {
                     onChange={alterarCampo}
                   >
                     <option>Pix</option>
+                    <option>Cartão</option>
                     <option>Dinheiro</option>
-                    <option>Cartão de débito</option>
-                    <option>Cartão de crédito</option>
-                    <option>Boleto</option>
-                    <option>A faturar</option>
                   </select>
-
-                  <select
-                    className="input"
-                    name="status"
-                    value={form.status}
-                    onChange={alterarCampo}
-                  >
-                    <option>Concluído</option>
-                    <option>Pendente</option>
-                    <option>Necessita retorno</option>
-                    <option>Aguardando peça</option>
-                  </select>
-                </div>
-
-                <div className="row">
-                  <select
-                    className="input"
-                    name="retornoNecessario"
-                    value={form.retornoNecessario}
-                    onChange={alterarCampo}
-                  >
-                    <option>Não</option>
-                    <option>Sim</option>
-                  </select>
-
-                  <input
-                    className="input"
-                    name="tecnico"
-                    value={form.tecnico}
-                    onChange={alterarCampo}
-                    placeholder="Técnico responsável"
-                    readOnly
-                  />
                 </div>
 
                 <div className="valorTexto">
@@ -422,57 +397,123 @@ export default function App() {
                 </div>
 
                 <button className="button" type="submit">
-                  Finalizar e enviar para a central
+                  Salvar atendimento
                 </button>
               </form>
 
               {mensagem && <p className="success">{mensagem}</p>}
             </div>
-          )}
 
-          <div className="card">
-            <h2>
-              {usuarioLogado.perfil === "central"
-                ? "Central de recebimento"
-                : "Meus atendimentos"}
-            </h2>
+            <div className="card">
+              <h2>Meus Atendimentos</h2>
 
-            <input
-              className="input"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar atendimento"
-            />
+              <input
+                className="input"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar atendimento"
+              />
 
-            <div className="lista">
-              {atendimentosFiltrados.length === 0 ? (
-                <p>Nenhum atendimento recebido.</p>
-              ) : (
-                atendimentosFiltrados.map((item) => (
-                  <div key={item.protocolo} className="item">
-                    <h3>
-                      {item.cliente} - {item.protocolo}
-                    </h3>
-                    <p><strong>Telefone:</strong> {item.telefone}</p>
-                    <p><strong>Endereço:</strong> {item.endereco}</p>
-                    <p><strong>Tipo:</strong> {item.tipoServico}</p>
-                    <p><strong>Equipamento:</strong> {item.equipamento}</p>
-                    <p><strong>Marca/Modelo:</strong> {item.marcaModelo}</p>
-                    <p><strong>Defeito:</strong> {item.defeitoRelatado}</p>
-                    <p><strong>Serviço:</strong> {item.servicoRealizado}</p>
-                    <p><strong>Observações:</strong> {item.observacoes || "-"}</p>
-                    <p><strong>Valor:</strong> {item.valorFormatado}</p>
-                    <p><strong>Pagamento:</strong> {item.pagamento}</p>
-                    <p><strong>Status:</strong> {item.status}</p>
-                    <p><strong>Retorno:</strong> {item.retornoNecessario}</p>
-                    <p><strong>Técnico:</strong> {item.tecnico}</p>
-                    <p><strong>Recebido em:</strong> {item.enviadoEm}</p>
-                  </div>
-                ))
-              )}
+              <div className="lista">
+                {atendimentosFiltrados.length === 0 ? (
+                  <p>Nenhum atendimento encontrado.</p>
+                ) : (
+                  atendimentosFiltrados.map((item) => (
+                    <div key={item.protocolo} className="item">
+                      <h3>
+                        {item.cliente} - {item.protocolo}
+                      </h3>
+                      <p><strong>Endereço:</strong> {item.endereco}</p>
+                      <p><strong>Número:</strong> {item.numeroResidencia}</p>
+                      <p><strong>Bairro:</strong> {item.bairro}</p>
+                      <p><strong>Data:</strong> {item.data}</p>
+                      <p><strong>Hora início:</strong> {item.horaInicio}</p>
+                      <p><strong>Hora término:</strong> {item.horaTermino}</p>
+                      <p><strong>Defeito:</strong> {item.defeitoApresentado}</p>
+                      <p><strong>Serviço:</strong> {item.servicoRealizado}</p>
+                      <p><strong>Valor:</strong> {item.valorFormatado}</p>
+                      <p><strong>Pagamento:</strong> {item.pagamento}</p>
+                      <p><strong>Técnico:</strong> {item.tecnico}</p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {usuarioLogado.perfil === "central" && (
+          <>
+            <div className="abasCentral">
+              <button
+                className={abaCentral === "atendimentos" ? "abaBtn ativa" : "abaBtn"}
+                onClick={() => setAbaCentral("atendimentos")}
+              >
+                Atendimentos
+              </button>
+
+              <button
+                className={abaCentral === "financeiro" ? "abaBtn ativa" : "abaBtn"}
+                onClick={() => setAbaCentral("financeiro")}
+              >
+                Financeiro
+              </button>
+            </div>
+
+            {abaCentral === "atendimentos" && (
+              <div className="card">
+                <h2>Todos os Atendimentos</h2>
+
+                <input
+                  className="input"
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder="Buscar atendimento"
+                />
+
+                <div className="lista">
+                  {atendimentosFiltrados.length === 0 ? (
+                    <p>Nenhum atendimento encontrado.</p>
+                  ) : (
+                    atendimentosFiltrados.map((item) => (
+                      <div key={item.protocolo} className="item">
+                        <h3>
+                          {item.cliente} - {item.protocolo}
+                        </h3>
+                        <p><strong>Endereço:</strong> {item.endereco}</p>
+                        <p><strong>Número:</strong> {item.numeroResidencia}</p>
+                        <p><strong>Bairro:</strong> {item.bairro}</p>
+                        <p><strong>Data:</strong> {item.data}</p>
+                        <p><strong>Hora início:</strong> {item.horaInicio}</p>
+                        <p><strong>Hora término:</strong> {item.horaTermino}</p>
+                        <p><strong>Defeito apresentado:</strong> {item.defeitoApresentado}</p>
+                        <p><strong>Serviço realizado:</strong> {item.servicoRealizado}</p>
+                        <p><strong>Valor:</strong> {item.valorFormatado}</p>
+                        <p><strong>Forma de pagamento:</strong> {item.pagamento}</p>
+                        <p><strong>Técnico:</strong> {item.tecnico}</p>
+                        <p><strong>Salvo em:</strong> {item.enviadoEm}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {abaCentral === "financeiro" && (
+              <div className="card">
+                <h2>Financeiro</h2>
+
+                <div className="financeiroBox">
+                  <p><strong>Total de atendimentos:</strong> {resumoFinanceiro.quantidade}</p>
+                  <p><strong>Soma de todos os recebimentos:</strong> {formatarMoeda(resumoFinanceiro.total)}</p>
+                  <p><strong>Total em Pix:</strong> {formatarMoeda(resumoFinanceiro.pix)}</p>
+                  <p><strong>Total em Cartão:</strong> {formatarMoeda(resumoFinanceiro.cartao)}</p>
+                  <p><strong>Total em Dinheiro:</strong> {formatarMoeda(resumoFinanceiro.dinheiro)}</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
