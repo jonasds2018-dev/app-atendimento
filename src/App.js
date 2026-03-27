@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./styles.css";
-import logo from "./logo-grupoon.jpg";
 
 const usuarios = [
   {
@@ -354,7 +353,7 @@ export default function App() {
       <div className="page loginPage">
         <div className="loginBox">
           <div className="logoArea">
-            <img src={logo} alt="Grupo ON" className="logoEmpresa" />
+            <div className="logoTexto">GRUPO ON</div>
             <h2>Grupo ON</h2>
             <p>Ligados em sua Segurança</p>
           </div>
@@ -392,7 +391,7 @@ export default function App() {
       <div className="container">
         <div className="topo">
           <div className="topoEsquerda">
-            <img src={logo} alt="Grupo ON" className="logoTopo" />
+            <div className="logoTopoTexto">ON</div>
             <div>
               <h1>Grupo ON</h1>
               <p>
