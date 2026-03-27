@@ -52,7 +52,7 @@ export default function App() {
     tecnico: "",
   });
 
-  const [central, setCentral] = useState([]);
+  const [central, setCentral] = useState<any[]>([]);
   const [busca, setBusca] = useState("");
   const [mensagem, setMensagem] = useState("");
 
